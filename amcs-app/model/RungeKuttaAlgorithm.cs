@@ -37,12 +37,14 @@ namespace amcs_app
 
         public void SolveSystemRK4()
         {
-            double x = X0;
+            double h = (Xf - X0) / _m;
 
             for (int i = 1; i < _m; i++)
             {
                 for (int j = 1; j < _n; j++)
                     Y[i, j] = Y[i - 1, j];
+
+                double x = X0 + i * h;
 
                 double[,] yt = new double[_m, _n];
 
@@ -50,10 +52,6 @@ namespace amcs_app
                 double[] k2 = new double[_n];
                 double[] k3 = new double[_n];
                 double[] k4 = new double[_n];
-
-                double h = (Xf - x) / _m;
-
-                x += i * h;
 
                 for (int k = 1; k < _n; k++)
                     k1[k] = h * _funcHandler(i, k, x, Y);

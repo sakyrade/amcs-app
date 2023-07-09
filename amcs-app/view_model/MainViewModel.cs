@@ -3,6 +3,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,15 +13,15 @@ using System.Windows.Markup;
 
 namespace amcs_app.view_model
 {
-    public class MainViewModel : ObservableObject
+    public class MainViewModel : ObservableObject, IDataErrorInfo
     {
         private RelayCommand _solutionCommand;
         private double _intensitySC;
         private double _intensityHuman;
         private double _finalValue;
         private int _numPoints;
-        private string _step;
-        private string _time;
+        private double _step;
+        private double _time;
         private Chart _chart;
 
         public double IntensitySC
@@ -63,7 +64,7 @@ namespace amcs_app.view_model
             }
         }
 
-        public string Step
+        public double Step
         {
             get { return _step; }
             set
@@ -73,7 +74,7 @@ namespace amcs_app.view_model
             }
         }
 
-        public string Time
+        public double Time
         {
             get { return _time; }
             set
@@ -98,12 +99,6 @@ namespace amcs_app.view_model
                 return _solutionCommand ??
                     (new RelayCommand(o =>
                     {
-                        if (IntensityHuman <= 0 || IntensitySC <= 0 || FinalValue <= 0 || NumPoints <= 0)
-                        {
-                            MessageBox.Show("Значения должны быть больше нуля.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-
                         Data.Clear();
 
                         int m = NumPoints;
@@ -111,7 +106,7 @@ namespace amcs_app.view_model
 
                         double[,] y0 = new double[m + 1, n + 1];
 
-                        for (int i = 0; i < n; i++)
+                        for (int i = 0; i < n + 1; i++)
                             y0[0, i] = 0;
                         y0[0, 1] = 1;
 
@@ -120,9 +115,9 @@ namespace amcs_app.view_model
 
                         rka.SolveSystemRK4();
 
-                        Step = rka.Dx.ToString();
+                        Step = rka.Dx;
 
-                        Time = (1 / IntensitySC + 1 / IntensityHuman - 1 / (IntensitySC + IntensityHuman)).ToString();
+                        Time = 1 / IntensitySC + 1 / IntensityHuman - 1 / (IntensitySC + IntensityHuman);
 
                         double x = 0;
                         int j = 0;
@@ -157,6 +152,46 @@ namespace amcs_app.view_model
                         _chart.Series["Series2"].ChartType = SeriesChartType.Line;
                         _chart.Series["Series2"].Points.DataBindXY(AxisX, AxisY2);
                     }));
+            }
+        }
+
+        public string Error { get { return null; } }
+
+        public string this[string name]
+        {
+            get
+            {
+                string err = null;
+
+                switch (name)
+                {
+                    case "IntensitySC":
+                        {
+                            if (IntensitySC <= 0)
+                                err = "Интенсивность СК не может быть меньше либо равна нулю.";
+                        }
+                        break;
+                    case "IntensityHuman":
+                        {
+                            if (IntensityHuman <= 0)
+                                err = "Интенсивность человека не может быть меньше либо равна нулю.";
+                        }
+                        break;
+                    case "FinalValue":
+                        {
+                            if (FinalValue < 1)
+                                err = "Конечное значение t не может быть меньше единицы.";
+                        }
+                        break;
+                    case "NumPoints":
+                        {
+                            if (NumPoints < 1)
+                                err = "Количество точек не может быть меньше единицы.";
+                        }
+                        break;
+                }
+
+                return err;
             }
         }
 

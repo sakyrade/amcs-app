@@ -22,13 +22,13 @@ namespace amcs_app.model
         public double F(int i, int j, double x, double[,] y)
         {
             if (j == 1)
-                return -(_l + _dzeta) * y[i, j];
+                return -(_l + _dzeta) * y[i, 1];
             else if (j == 2)
-                return _dzeta * y[i, j - 1] - _l * y[i, j];
+                return _dzeta * y[i, 1] - _l * y[i, 2];
             else if (j == 3)
-                return _l * y[i, j - 2] - _dzeta * y[i, j];
+                return _l * y[i, 1] - _dzeta * y[i, 3];
 
-            return _l * y[i, j - 2] + _dzeta * y[i, j - 1];
+            return _l * y[i, 2] + _dzeta * y[i, 3];
         }
     }
 }

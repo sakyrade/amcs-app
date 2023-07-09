@@ -10,6 +10,18 @@
         WindowStartupLocation="CenterScreen"
         Title="Расчет надежности АСКУ-человек" Height="450" Width="1100">
 
+    <Window.Resources>
+        <Style x:Key="TextBoxInError" TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip"
+                            Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                            Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.78*" />
@@ -37,15 +49,65 @@
                         <Label VerticalAlignment="Center" Content="Конечное значение t:" Grid.Row="2" Grid.Column="0" />
                         <Label VerticalAlignment="Center" Content="Количество точек на промежутке:" Grid.Row="3" Grid.Column="0" />
 
-                        <TextBox Text="{Binding IntensitySC, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" />
-                        <TextBox Text="{Binding IntensityHuman, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1" />
-                        <TextBox Text="{Binding FinalValue, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1" />
-                        <TextBox Text="{Binding NumPoints, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1" />
+                        <TextBox x:Name="tbIntensitySC" Style="{StaticResource TextBoxInError}" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1">
+                            <TextBox.Text>
+                                <Binding Path="IntensitySC" ValidatesOnExceptions="True">
+                                    <Binding.ValidationRules>
+                                        <DataErrorValidationRule />
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
+                        <TextBox x:Name="tbIntensityHuman" Style="{StaticResource TextBoxInError}" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1">
+                            <TextBox.Text>
+                                <Binding Path="IntensityHuman" ValidatesOnExceptions="True">
+                                    <Binding.ValidationRules>
+                                        <DataErrorValidationRule />
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
+                        <TextBox x:Name="tbFinalValue" Style="{StaticResource TextBoxInError}" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1">
+                            <TextBox.Text>
+                                <Binding Path="FinalValue" ValidatesOnExceptions="True">
+                                    <Binding.ValidationRules>
+                                        <DataErrorValidationRule />
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
+                        <TextBox x:Name="tbNumPoints" Style="{StaticResource TextBoxInError}" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1">
+                            <TextBox.Text>
+                                <Binding Path="NumPoints" ValidatesOnExceptions="True">
+                                    <Binding.ValidationRules>
+                                        <DataErrorValidationRule />
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
                     </Grid>
 
                     <Label VerticalAlignment="Center" Content="{Binding Step}" ContentStringFormat='Шаг: {0}' />
                     <Label VerticalAlignment="Center" Content="{Binding Time}" ContentStringFormat='Среднее время наработки до отказа: {0}' />
-                    <Button Command="{Binding SolutionCommand}" Margin="5" Content="Вычислить"/>
+                    
+                    <Button x:Name="btnSolve" IsDefault="True" Command="{Binding SolutionCommand}" Margin="5" Content="Вычислить">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Path=(Validation.HasError), ElementName=tbIntensitySC}" Value="False" />
+                                            <Condition Binding="{Binding Path=(Validation.HasError), ElementName=tbIntensityHuman}" Value="False" />
+                                            <Condition Binding="{Binding Path=(Validation.HasError), ElementName=tbFinalValue}" Value="False" />
+                                            <Condition Binding="{Binding Path=(Validation.HasError), ElementName=tbNumPoints}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="IsEnabled" Value="True" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </StackPanel>
             </GroupBox>
         </StackPanel>
