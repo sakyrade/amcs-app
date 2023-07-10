@@ -92,6 +92,8 @@ namespace amcs_app.view_model
 
         public double[] AxisY2 { get; private set; }
 
+        public string Error { get { return null; } }
+
         public RelayCommand SolutionCommand
         {
             get
@@ -111,6 +113,7 @@ namespace amcs_app.view_model
                         y0[0, 1] = 1;
 
                         CurrentFunction cf = new CurrentFunction(IntensitySC, IntensityHuman);
+
                         RungeKuttaAlgorithm rka = new RungeKuttaAlgorithm(0, FinalValue, y0, m + 1, n + 1, m, cf.F);
 
                         rka.SolveSystemRK4();
@@ -144,18 +147,14 @@ namespace amcs_app.view_model
                         }
                         while (x < FinalValue);
 
-                        _chart.Series["Series1"].ChartArea = "Default";
                         _chart.Series["Series1"].ChartType = SeriesChartType.Line;
                         _chart.Series["Series1"].Points.DataBindXY(AxisX, AxisY1);
 
-                        _chart.Series["Series2"].ChartArea = "Default";
                         _chart.Series["Series2"].ChartType = SeriesChartType.Line;
                         _chart.Series["Series2"].Points.DataBindXY(AxisX, AxisY2);
                     }));
             }
         }
-
-        public string Error { get { return null; } }
 
         public string this[string name]
         {
@@ -198,11 +197,15 @@ namespace amcs_app.view_model
         public MainViewModel(Chart chart)
         {
             Data = new ObservableCollection<DataGridItem>();
+
             _chart = chart;
 
             _chart.ChartAreas.Add(new ChartArea("Default"));
             _chart.Series.Add(new Series("Series1"));
             _chart.Series.Add(new Series("Series2"));
+
+            _chart.Series["Series1"].ChartArea = "Default";
+            _chart.Series["Series2"].ChartArea = "Default";
         }
     }
 }
